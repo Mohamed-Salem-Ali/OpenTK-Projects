@@ -29,8 +29,9 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnLoad(EventArgs e)
         {
-            _snakeComponent = new SnakeComponent(Vector2.One);
-            _shader = new Shader();
+            _snakeComponent = new SnakeComponent(new Vector3(-1f, -1f, 0));
+//            _snakeComponent.Position = new Vector3(-1f, -1f, 0f);
+            _shader = new Shader("Shaders/snake.vert", "Shaders/basic.frag");
             
             GL.ClearColor(0.0f, 0.0f, 1.0f, 1.0f);
             base.OnLoad(e);

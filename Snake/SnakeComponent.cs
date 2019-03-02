@@ -25,26 +25,39 @@ namespace Snake
         /// <summary>
         /// The current position of the snake
         /// </summary>
-        public Vector2 Position { get; set; }
+        public Vector3 Position
+        {
+            get => _transformMatrix.ExtractTranslation();
+            set
+            {
+                _transformMatrix.ClearTranslation();
+                _transformMatrix *= Matrix4.CreateTranslation(value);
+            }
+        }
+
+        /// <summary>
+        /// Matrix of the transformation of this snake component
+        /// </summary>
+        private Matrix4 _transformMatrix = Matrix4.Identity;
 
         /// <summary>
         /// OpenGL Vertex Array Object handle
         /// </summary>
-        private int _vao;
+        private readonly int _vao;
         /// <summary>
         /// OpenGL Vertex Buffer Object handle
         /// </summary>
-        private int _vbo;
+        private readonly int _vbo;
         /// <summary>
         /// OpenGL Element Buffer Object Handle
         /// </summary>
-        private int _ibo;
+        private readonly int _ibo;
 
         /// <summary>
         /// Initialize Snake so it is ready to be used
         /// </summary>
         /// <param name="position">Position of this Snake Component</param>
-        public unsafe SnakeComponent(Vector2 position)
+        public unsafe SnakeComponent(Vector3 position)
         {
             //Set variables
             Position = position;
@@ -106,6 +119,7 @@ namespace Snake
         public void Draw()
         {
             //TODO: Apply the position of the snake here
+            Shader.SetUniform("transform", ref _transformMatrix);
             
             GL.BindVertexArray(_vao);
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 0);

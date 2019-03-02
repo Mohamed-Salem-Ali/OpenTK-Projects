@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace Snake
@@ -14,6 +15,8 @@ namespace Snake
         /// Program handle
         /// </summary>
         private readonly int _handle;
+
+        private static int _currentHandle;
 
         /// <summary>
         /// Creates a shader from given paths
@@ -69,6 +72,23 @@ namespace Snake
         public void Bind()
         {
             GL.UseProgram(_handle);
+            _currentHandle = _handle;
+        }
+
+        /// <summary>
+        /// Sets a matrix uniform to given location from name
+        /// </summary>
+        /// <param name="name">Name used to look for uniform on current shader</param>
+        /// <param name="value">Value to set uniform to</param>
+        /// <exception cref="ArgumentException">Thrown when uniform could not be found from name</exception>
+        public static void SetUniform(string name, ref Matrix4 value)
+        {
+            int location = GL.GetUniformLocation(_currentHandle, name);
+            if (location == -1)
+            {
+                throw new ArgumentException("uniform name not found");
+            }
+            GL.UniformMatrix4(location, true, ref value);
         }
 
         #region Disposing
@@ -81,7 +101,11 @@ namespace Snake
             if (!_isDisposed)
             {
                 GL.DeleteProgram(_handle);
-                GL.UseProgram(0);
+                if (_currentHandle == _handle)
+                {
+                    _currentHandle = 0;
+                    GL.UseProgram(0);
+                }
                 
                 _isDisposed = true;
                 GC.SuppressFinalize(this);
