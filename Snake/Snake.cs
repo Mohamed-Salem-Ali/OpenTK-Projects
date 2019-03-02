@@ -11,6 +11,7 @@ namespace Snake
     public class Snake : GameWindow
     {
         private SnakeComponent _snakeComponent;
+        private Shader _shader;
         
         /// <summary>
         /// Creates a basic window
@@ -29,7 +30,7 @@ namespace Snake
         protected override void OnLoad(EventArgs e)
         {
             _snakeComponent = new SnakeComponent(Vector2.One);
-            Shader.Initialize();
+            _shader = new Shader();
             
             GL.ClearColor(0.0f, 0.0f, 1.0f, 1.0f);
             base.OnLoad(e);
@@ -44,7 +45,11 @@ namespace Snake
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
             
+            //TODO: Draw the background here
+            
             //Draw everything here
+            _shader.Bind();
+            
             _snakeComponent.Draw();
             
             Context.SwapBuffers();
@@ -69,7 +74,7 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnUnload(EventArgs e)
         {
-            Shader.Dispose();
+            _shader.Dispose();
             _snakeComponent.Dispose();
             base.OnUnload(e);
         }

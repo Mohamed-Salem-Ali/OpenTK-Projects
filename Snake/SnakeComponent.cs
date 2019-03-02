@@ -40,21 +40,15 @@ namespace Snake
         /// </summary>
         private int _ibo;
 
-        #region Initialization
         /// <summary>
         /// Initialize Snake so it is ready to be used
         /// </summary>
         /// <param name="position">Position of this Snake Component</param>
-        public SnakeComponent(Vector2 position)
+        public unsafe SnakeComponent(Vector2 position)
         {
             //Set variables
             Position = position;
 
-            InitializeOpenGl();
-        }
-
-        public unsafe void InitializeOpenGl()
-        {
             //Initialize VAO and bind it before we initialize the buffers
             _vao = GL.GenVertexArray();
             GL.BindVertexArray(_vao);
@@ -105,7 +99,6 @@ namespace Snake
                 1, 3, 4
             };
         }
-        #endregion Initialization
 
         /// <summary>
         /// Draw the snake

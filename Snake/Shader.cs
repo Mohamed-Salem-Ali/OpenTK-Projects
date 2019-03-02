@@ -1,160 +1,82 @@
 using System;
-using OpenTK.Graphics.OpenGL4;
+using System.IO;
+using System.Net;
+using OpenTK.Graphics.OpenGL;
 
 namespace Snake
 {
     /// <summary>
-    /// A class to manage the shaders of the program
+    /// Holds and manages the openGl shader program handle
     /// </summary>
-    public static class Shader
+    public class Shader : IDisposable
     {
         /// <summary>
-        /// Handle for the shader program
+        /// Program handle
         /// </summary>
-        public static int _handle;
+        private readonly int _handle;
 
         /// <summary>
-        /// Source of the Vertex shader.
-        /// This is defined in c# so we dont
-        /// have to load any external files
+        /// Creates a shader from given paths
         /// </summary>
-        private static string VertexSource
+        /// <param name="vertexPath">Path of the vertex shader</param>
+        /// <param name="fragmentPath">Path of the fragment shader</param>
+        public Shader(string vertexPath = "basic.vert", string fragmentPath = "basic.frag")
         {
-            get
-            {
-                return
-@"#version 330 core
-layout (location = 0) in vec2 pos;
+            //Create the shaders
+            int vertex = BuildShader(vertexPath, ShaderType.VertexShader);
+            int fragment = BuildShader(fragmentPath, ShaderType.FragmentShader);
 
-void main(){
-    gl_Position = vec4(pos, 0.0f, 1.0f);
-}";
-
-            }
-        }
-        /// <summary>
-        /// Source of the Fragment shader.
-        /// This is defined in c# so we dont
-        /// have to load any external files
-        /// </summary>
-        private static string FragmentSource
-        {
-            get
-            {
-                return
-@"#version 330 core
-out vec4 color;
-
-void main(){
-    color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-}";
-
-            }
+            //Create the program
+            _handle = GL.CreateProgram();
+            GL.AttachShader(_handle, vertex);
+            GL.AttachShader(_handle, fragment);
+            GL.LinkProgram(_handle);
+            
+            //Detach and delete the shaders again
+            GL.DetachShader(_handle, vertex);
+            GL.DeleteShader(vertex);
+            GL.DetachShader(_handle, fragment);
+            GL.DeleteShader(vertex);
         }
 
-        #region Initialization
         /// <summary>
-        /// Initializes the shader
+        /// Builds a shader and returns the handle to the shader
         /// </summary>
-        public static void Initialize()
+        /// <param name="path">Path of the shader</param>
+        /// <param name="shaderType">Type of the shader</param>
+        /// <returns>Handle of the shader</returns>
+        public static int BuildShader(string path, ShaderType shaderType)
         {
-            _handle = CreateProgram();
+            //Create the shader
+            int handle = GL.CreateShader(shaderType);
+            string source = File.ReadAllText(path);
+            GL.ShaderSource(handle, source);
+            
+            //Compile the shader
+            GL.CompileShader(handle);
+            string infoLog = GL.GetShaderInfoLog(handle);
+            if (!string.IsNullOrWhiteSpace(infoLog))
+            {
+                Console.WriteLine($"{shaderType} compiled with error: {infoLog}");
+            }
+            
+            return handle;
+        }
+
+        /// <summary>
+        /// Binds the shader
+        /// </summary>
+        public void Bind()
+        {
             GL.UseProgram(_handle);
         }
 
+        #region Disposing
         /// <summary>
-        /// Creates a openGl shader program
+        /// Is this object disposed?
         /// </summary>
-        /// <returns>The handle of the openGL shader program</returns>
-        private static int CreateProgram()
-        {
-            //First we create the two shaders
-            CreateShaders(out int vertex, out int fragment);
-            
-            //Next we compile them
-            CompileShader(vertex);
-            CompileShader(fragment);
-            
-            //Now we want to attach the shaders to the program
-            int handle = LinkShaders(vertex, fragment);
-
-            //Dispose the two individual shaders after linking
-            DetachShaders(handle, vertex, fragment);
-            
-            return handle;
-        }
-
-        /// <summary>
-        /// Detach the two shaders from the program and delete them
-        /// </summary>
-        /// <param name="program">Program to detach from</param>
-        /// <param name="vertex">Vertex shader to delete</param>
-        /// <param name="fragment">Fragment shader to delete</param>
-        private static void DetachShaders(int program, int vertex, int fragment)
-        {
-            GL.DetachShader(program, vertex);
-            GL.DetachShader(program, fragment);
-            GL.DeleteShader(vertex);
-            GL.DeleteShader(fragment);
-        }
-
-        /// <summary>
-        /// Links two shaders to a new program and returns the handle
-        /// </summary>
-        /// <param name="vertex">Vertex shader to link to the new program</param>
-        /// <param name="fragment">Fragment shader to link to the new program</param>
-        /// <returns>The newly generated handle</returns>
-        private static int LinkShaders(int vertex, int fragment)
-        {
-            int handle = GL.CreateProgram();
-            GL.AttachShader(handle, vertex);
-            GL.AttachShader(handle, fragment);
-            GL.LinkProgram(handle);
-            return handle;
-        }
-
-        /// <summary>
-        /// Compiles a shader and checks it for errors
-        /// </summary>
-        /// <param name="shader">handle of shader to compile</param>
-        /// <exception cref="Exception">Thrown if shader fails to compile</exception>
-        private static void CompileShader(int shader)
-        {
-            GL.CompileShader(shader);
-            //Check for errors
-            string infoLog = GL.GetShaderInfoLog(shader);
-            if (!string.IsNullOrWhiteSpace(infoLog))
-            {
-                Console.WriteLine($"Shader failed to load | {infoLog}");
-                throw new Exception($"Shader failed to load | {infoLog}");
-            }
-        }
-
-        /// <summary>
-        /// Creates two shaders and returns the handles
-        /// </summary>
-        /// <param name="vertex">handle of the vertex shader</param>
-        /// <param name="fragment">handle of the fragment shader</param>
-        private static void CreateShaders(out int vertex, out int fragment)
-        {
-            vertex = GL.CreateShader(ShaderType.VertexShader);
-            fragment = GL.CreateShader(ShaderType.FragmentShader);
-            GL.ShaderSource(vertex, VertexSource);
-            GL.ShaderSource(fragment, FragmentSource);
-        }
-        #endregion Initialization
-
-        #region Dispose
-
-        /// <summary>
-        /// Is this class disposed?
-        /// </summary>
-        private static bool _isDisposed = false;
-
-        /// <summary>
-        /// Dispose the class and get rid of openGl handles that will no longer be used
-        /// </summary>
-        public static void Dispose()
+        private bool _isDisposed = false;
+        public void Dispose()
         {
             if (!_isDisposed)
             {
@@ -162,8 +84,14 @@ void main(){
                 GL.UseProgram(0);
                 
                 _isDisposed = true;
+                GC.SuppressFinalize(this);
             }
         }
-        #endregion Dispose
+
+        ~Shader()
+        {
+            Dispose();
+        }
+        #endregion Disposing
     }
 }
