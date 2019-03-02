@@ -1,9 +1,15 @@
-﻿namespace Snake
+﻿using System;
+
+namespace Snake
 {
-    internal class Program
+    internal static class Program
     {
         public static void Main(string[] args)
         {
+            using (Snake snake = new Snake(500, 500, "snake"))
+            {
+                snake.Run(60.0f);
+            }
         }
     }
 }
