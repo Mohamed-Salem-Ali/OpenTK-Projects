@@ -1,0 +1,17 @@
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/shader.vert
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/shader.frag
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/TestProject.exe.config
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/TestProject.exe
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/TestProject.pdb
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/OpenTK.dll
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/OpenTK.pdb
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/OpenTK.xml
+/home/frederikja/Projects/TestProject/TestProject/obj/x86/Debug/TestProject.csprojAssemblyReference.cache
+/home/frederikja/Projects/TestProject/TestProject/obj/x86/Debug/TestProject.exe.config
+/home/frederikja/Projects/TestProject/TestProject/obj/x86/Debug/TestProject.csproj.CoreCompileInputs.cache
+/home/frederikja/Projects/TestProject/TestProject/obj/x86/Debug/TestProject.csproj.CopyComplete
+/home/frederikja/Projects/TestProject/TestProject/obj/x86/Debug/TestProject.exe
+/home/frederikja/Projects/TestProject/TestProject/obj/x86/Debug/TestProject.pdb
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/System.Drawing.Common.dll
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/System.Drawing.Common.xml
+/home/frederikja/Projects/TestProject/TestProject/bin/Debug/test
