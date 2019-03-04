@@ -4,14 +4,10 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace Snake
 {
-    /// <summary>
-    /// One component of the snake
-    /// This class will manage drawing as well as movement of any particular parts of the snake
-    /// </summary>
-    public class SnakeComponent : DrawAble
+    public class Fruit : DrawAble
     {
         /// <summary>
-        /// The current position of the snakecomponent
+        /// The current position of the fruit
         /// </summary>
         public Vector2 Position
         {
@@ -29,16 +25,16 @@ namespace Snake
         }
 
         /// <summary>
-        /// Basic constructor to initialize the snake component with a given position
+        /// Generate a fruit at given position
         /// </summary>
-        /// <param name="position">Position to initialize snake component at</param>
-        public SnakeComponent(Vector2 position)
+        /// <param name="position">Position to generate fruit at</param>
+        public Fruit(Vector2 position)
             : base()
         {
             _transformMatrix *= Matrix4.CreateScale(.5f / Config.GridSize.X, .5f/ Config.GridSize.Y, 1);
             Position = position;
         }
-
+        
         /// <summary>
         /// Define the layout of a vertex, this is called in the constructor from drawable
         /// </summary>
