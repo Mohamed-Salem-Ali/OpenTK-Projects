@@ -12,8 +12,9 @@ namespace Snake
     {
         /// <summary>
         /// The current position of the snakecomponent
+        /// The position will be rounded to the nearest integer so whole numbers are guaranteed
         /// </summary>
-        public Vector2 Position
+        public Vector2 PositionInt
         {
             get
             {
@@ -21,7 +22,25 @@ namespace Snake
                 return new Vector2((float)Math.Round((pos.X + 1f) * Config.GridSize.X + .5f), 
                     (float)Math.Round((pos.Y + 1f) * Config.GridSize.Y + .5f));
             }
-            set
+            private set
+            {
+                _transformMatrix = _transformMatrix.ClearTranslation();
+                _transformMatrix *= Matrix4.CreateTranslation((value.X-.5f) / Config.GridSize.X - 1f, (value.Y-.5f) / Config.GridSize.Y - 1f, 0);
+            }
+        }
+        /// <summary>
+        /// The current position of the snakecomponent
+        /// The position will be a floating point number so precision is guaranteed
+        /// </summary>
+        public Vector2 PositionFloat
+        {
+            get
+            {
+                Vector2 pos = _transformMatrix.ExtractTranslation().Xy;
+                return new Vector2((pos.X + 1f) * Config.GridSize.X + .5f, 
+                    (pos.Y + 1f) * Config.GridSize.Y + .5f);
+            }
+            private set
             {
                 _transformMatrix = _transformMatrix.ClearTranslation();
                 _transformMatrix *= Matrix4.CreateTranslation((value.X-.5f) / Config.GridSize.X - 1f, (value.Y-.5f) / Config.GridSize.Y - 1f, 0);
@@ -29,14 +48,32 @@ namespace Snake
         }
 
         /// <summary>
+        /// Field of the direction
+        /// </summary>
+        private Vector2 _direction;
+        /// <summary>
+        /// Direction of this part of the snake
+        /// Used to make smooth movement
+        /// </summary>
+        public Vector2 Direction
+        {
+            get => _direction;
+            set
+            {
+                _direction = value;
+                PositionInt = PositionInt;
+            }
+        }
+
+        /// <summary>
         /// Basic constructor to initialize the snake component with a given position
         /// </summary>
-        /// <param name="position">Position to initialize snake component at</param>
-        public SnakeComponent(Vector2 position)
+        /// <param name="positionInt">Position to initialize snake component at</param>
+        public SnakeComponent(Vector2 positionInt)
             : base()
         {
             _transformMatrix *= Matrix4.CreateScale(.5f / Config.GridSize.X, .5f/ Config.GridSize.Y, 1);
-            Position = position;
+            PositionInt = positionInt;
         }
 
         /// <summary>
@@ -68,6 +105,14 @@ namespace Snake
             }
         }
 
+        /// <summary>
+        /// Should be called once per update to update the position of the snake
+        /// </summary>
+        public void Update(float DeltaTime)
+        {
+            PositionFloat += Direction * DeltaTime / Config.TickSpeed;
+        }
+        
         /// <inheritdoc />
         /// <summary>
         /// Generate the IB data for the IBO

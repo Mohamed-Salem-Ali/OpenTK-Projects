@@ -35,10 +35,11 @@ namespace Snake
         /// Random generator used to place the fruits
         /// </summary>
         private Random _random;
+
         /// <summary>
-        /// Direction of the head of the snake
+        /// The direction of the head at the next tick
         /// </summary>
-        private Vector2 _direction = Vector2.Zero;
+        private Vector2 _direction;
         /// <summary>
         /// Direction of the head of the snake last time we moved it
         /// </summary>
@@ -89,7 +90,7 @@ namespace Snake
             }
             for (int i = 0; i < count; i++)
             {
-                _snake.Add(new SnakeComponent(_snake.Last().Position));
+                _snake.Add(new SnakeComponent(_snake.Last().PositionInt));
             }
         }
 
@@ -167,7 +168,7 @@ namespace Snake
             //Check if the position unique
             for (int i = 0; i < _snake.Count; i++)
             {
-                if (position == _snake[i].Position && i != 0)
+                if (position == _snake[i].PositionInt && i != 0)
                 {
                     return false;
                 }
@@ -185,30 +186,35 @@ namespace Snake
             _time += (float)e.Time;
             while (_time >= Config.TickSpeed)
             {
-                //Move the snake body
+                //Update the direction of the snake body
                 for (int i = _snake.Count - 1; i > 0; i--)
                 {
-                    _snake[i].Position = _snake[i - 1].Position;
+                    _snake[i].Direction = _snake[i - 1].Direction;
                 }
                 
-                //Move the head
-                _snake[0].Position += _direction;
-                //Check if the snake head can occupy the new position
-                if (!ValidPosition(_snake[0].Position, true))
+                //Update the direction of the head of the snake
+                _snake[0].Direction = _direction;
+                //Check if the snake head can occupy the position at the new direction
+                if (!ValidPosition(_snake[0].PositionInt + _snake[0].Direction, true))
                 {
                     //Dead
                     Console.WriteLine("Dead!");
                 }
                 
                 //Check for the fruit powerup
-                if (_snake[0].Position == _fruit.Position)
+                if (_snake[0].PositionInt == _fruit.Position)
                 {
                     AddSnakePart();
                     RegenerateFruit();
                 }
 
-                _lastDirection = _direction;
+                _lastDirection = _snake[0].Direction;
                 _time -= Config.TickSpeed;
+            }
+            //Update all the components of the snake
+            for (int i = 0; i < _snake.Count; i++)
+            {
+                _snake[i].Update((float)e.Time);
             }
             
             base.OnUpdateFrame(e);
