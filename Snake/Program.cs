@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Snake
+﻿namespace Snake
 {
     internal static class Program
     {

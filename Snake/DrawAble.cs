@@ -7,17 +7,6 @@ namespace Snake
     public abstract class DrawAble : IDisposable
     {
         /// <summary>
-        /// Struct of a single vertex
-        /// </summary>
-        protected struct Vertex
-        {
-            /// <summary>
-            /// Position of the vertex
-            /// </summary>
-            public Vector2 Position { get; set; }
-        }
-
-        /// <summary>
         /// Matrix of the transformation of this snake component
         /// </summary>
         protected Matrix4 _transformMatrix = Matrix4.Identity;
@@ -39,18 +28,18 @@ namespace Snake
         /// </summary>
         private readonly int _indexCount;
 
-        protected unsafe DrawAble()
+        protected DrawAble()
         {
             //Initialize VAO and bind it before we initialize the buffers
             _vao = GL.GenVertexArray();
             GL.BindVertexArray(_vao);
             
             //Initialize VBO
-            Vertex[] vertices = VertexBuffer; 
+            float[] vertices = VertexBuffer; 
             
             _vbo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(Vertex) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * vertices.Length, vertices, BufferUsageHint.StaticDraw);
             
             //Initialize IBO
             uint[] indices = IndexBuffer;
@@ -83,7 +72,7 @@ namespace Snake
         /// The vertex buffer this is used to generate the VBO for the VAO
         /// Used once in the constructor
         /// </summary>
-        protected abstract Vertex[] VertexBuffer { get; }
+        protected abstract float[] VertexBuffer { get; }
         /// <summary>
         /// The index buffer this is used to generate the IBO for the VAO
         /// Used once in constructor
@@ -94,7 +83,7 @@ namespace Snake
         /// <summary>
         /// Has this been disposed?
         /// </summary>
-        private bool _isDisposed = false;
+        private bool _isDisposed;
         
         /// <summary>
         /// Dispose the OpenGL handles

@@ -18,6 +18,10 @@ namespace Snake
         /// </summary>
         private Shader _snakeShader;
         /// <summary>
+        /// Texture for the snake head
+        /// </summary>
+        private Texture _snakeHeadTexture;
+        /// <summary>
         /// A list of all the snake components to make the actual snake
         /// </summary>
         private List<SnakeComponent> _snake = new List<SnakeComponent>();
@@ -31,6 +35,10 @@ namespace Snake
         /// The fruit the snake can pick up to increase its length
         /// </summary>
         private Fruit _fruit;
+        /// <summary>
+        /// Texture for the fruit
+        /// </summary>
+        private Texture _fruitTexture;
         /// <summary>
         /// Random generator used to place the fruits
         /// </summary>
@@ -48,16 +56,20 @@ namespace Snake
         /// Used to keep track of when the next tick will occour
         /// </summary>
         private float _time;
-        
+
+
         /// <summary>
         /// Creates a basic window
         /// </summary>
         /// <param name="width">Width of the window</param>
         /// <param name="height">Height of the window</param>
         /// <param name="title">Title of the window</param>
-        public Snake(int width, int height, string title) 
+        public Snake(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
-        { }
+        {
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        }
 
         /// <summary>
         /// Load and set up resources
@@ -69,11 +81,12 @@ namespace Snake
             
             AddSnakePart(4);
             
-            _fruitShader = new Shader("Shaders/snake.vert", "Shaders/basic.frag");
+            _fruitTexture = new Texture("Textures/apple.png");
+            _fruitShader = new Shader("Shaders/fruit.vert", "Shaders/fruit.frag");
             _random = new Random(DateTime.Now.Millisecond + DateTime.Now.Day * 1000 + DateTime.Now.Year * 10000);
             RegenerateFruit();
             
-            GL.ClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+            GL.ClearColor(0.25f, .75f, .25f, 1.0f);
             base.OnLoad(e);
         }
 
@@ -140,8 +153,6 @@ namespace Snake
                     break;
                 case Key.D:
                     _direction = Vector2.UnitX;
-                    break;
-                default:
                     break;
             }
 
@@ -233,6 +244,7 @@ namespace Snake
             //Draw everything here
             
             _fruitShader.Bind();
+            _fruitTexture.Bind();
             _fruit.Draw();
             
             _snakeShader.Bind();
@@ -264,6 +276,7 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnUnload(EventArgs e)
         {
+            _fruitTexture.Dispose();
             _fruit.Dispose();
             _fruitShader.Dispose();
             

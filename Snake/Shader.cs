@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Net;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
@@ -60,7 +59,7 @@ namespace Snake
             string infoLog = GL.GetShaderInfoLog(handle);
             if (!string.IsNullOrWhiteSpace(infoLog))
             {
-                Console.WriteLine($"{shaderType} compiled with error: {infoLog}");
+                Console.WriteLine($"{shaderType} at {path} compiled with error: {infoLog}");
             }
             
             return handle;
@@ -95,7 +94,7 @@ namespace Snake
         /// <summary>
         /// Is this object disposed?
         /// </summary>
-        private bool _isDisposed = false;
+        private bool _isDisposed;
         public void Dispose()
         {
             if (!_isDisposed)
