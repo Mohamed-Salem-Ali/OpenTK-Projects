@@ -89,6 +89,36 @@ namespace Snake
             }
             GL.UniformMatrix4(location, true, ref value);
         }
+        /// <summary>
+        /// Sets a vector2 uniform to given location from name
+        /// </summary>
+        /// <param name="name">Name used to look for uniform on current shader</param>
+        /// <param name="value">Value to set uniform to</param>
+        /// <exception cref="ArgumentException">Thrown when uniform could not be found from name</exception>
+        public static void SetUniform(string name, ref Vector2 value)
+        {
+            int location = GL.GetUniformLocation(_currentHandle, name);
+            if (location == -1)
+            {
+                throw new ArgumentException("uniform name not found");
+            }
+            GL.Uniform2(location, ref value);
+        }
+        /// <summary>
+        /// Sets a vector3 uniform to given location from name
+        /// </summary>
+        /// <param name="name">Name used to look for uniform on current shader</param>
+        /// <param name="value">Value to set uniform to</param>
+        /// <exception cref="ArgumentException">Thrown when uniform could not be found from name</exception>
+        public static void SetUniform(string name, ref Vector3 value)
+        {
+            int location = GL.GetUniformLocation(_currentHandle, name);
+            if (location == -1)
+            {
+                throw new ArgumentException("uniform name not found");
+            }
+            GL.Uniform3(location, ref value);
+        }
 
         #region Disposing
         /// <summary>

@@ -47,6 +47,16 @@ namespace Snake
             GL.EnableVertexAttribArray(1);
         }
 
+        /// <summary>
+        /// Set the variables for the shader, then draw the fruit
+        /// </summary>
+        public override void Draw()
+        {
+            Shader.SetUniform("transform", ref _transformMatrix);
+
+            base.Draw();
+        }
+
         /// <inheritdoc />
         /// <summary>
         /// Generate the VB data for the VBO

@@ -46,6 +46,21 @@ namespace Snake
                 _transformMatrix *= Matrix4.CreateTranslation((value.X-.5f) / Config.GridSize.X - 1f, (value.Y-.5f) / Config.GridSize.Y - 1f, 0);
             }
         }
+        /// <summary>
+        /// Rotation of the snake part
+        /// </summary>
+        private float Rotation
+        {
+            get => _transformMatrix.ExtractRotation().ToAxisAngle().W;
+            set
+            {
+                Vector2 pos = PositionFloat;
+                PositionFloat = Vector2.Zero;
+                _transformMatrix = _transformMatrix.ClearRotation();
+                _transformMatrix *= Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(value));
+                PositionFloat = pos;
+            }
+        }
 
         /// <summary>
         /// Field of the direction
@@ -60,6 +75,31 @@ namespace Snake
             get => _direction;
             set
             {
+                if (value.X == 1)
+                {
+                    //E: Rot 90
+                    Rotation = 270;
+                }
+                else if (value.X == -1)
+                {
+                    //W: Rot 270 || -90
+                    Rotation = 90;
+                }
+                else if (value.Y == 1)
+                {
+                    //N: Rot 0
+                    Rotation = 0;
+                }
+                else if (value.Y == -1)
+                {
+                    //S: Rot 180
+                    Rotation = 180;
+                }
+                else
+                {
+                    //Not a valid direction, so we just return
+                    return;
+                }
                 _direction = value;
                 PositionInt = PositionInt;
             }
@@ -111,7 +151,28 @@ namespace Snake
         {
             PositionFloat += Direction * DeltaTime / Config.TickSpeed;
         }
-        
+
+        /// <summary>
+        /// Set the variables for the shader, then draw the component
+        /// </summary>
+        public override void Draw()
+        {
+            Shader.SetUniform("transform", ref _transformMatrix);
+            Shader.SetUniform("direction", ref _direction);
+
+            base.Draw();
+        }
+
+        /// <summary>
+        /// Called only if this is the snake head
+        /// </summary>
+        protected void DrawHead()
+        {
+            Shader.SetUniform("transform", ref _transformMatrix);
+            
+            base.Draw();
+        }
+
         /// <inheritdoc />
         /// <summary>
         /// Generate the IB data for the IBO

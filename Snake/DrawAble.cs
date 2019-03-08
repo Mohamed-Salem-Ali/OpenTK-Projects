@@ -55,10 +55,8 @@ namespace Snake
         /// <summary>
         /// Draw the drawable
         /// </summary>
-        public void Draw()
+        public virtual void Draw()
         {
-            Shader.SetUniform("transform", ref _transformMatrix);
-            
             GL.BindVertexArray(_vao);
             GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedInt, 0);
         }

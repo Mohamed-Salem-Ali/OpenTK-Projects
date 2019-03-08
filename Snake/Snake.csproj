@@ -57,6 +57,7 @@
     <Compile Include="Shader.cs" />
     <Compile Include="Snake.cs" />
     <Compile Include="SnakeComponent.cs" />
+    <Compile Include="SnakeHead.cs" />
     <Compile Include="Texture.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +75,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Shaders\fruit.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Shaders\snake.frag">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Shaders\snake.vert">

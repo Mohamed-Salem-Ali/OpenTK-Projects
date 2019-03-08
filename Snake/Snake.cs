@@ -22,6 +22,14 @@ namespace Snake
         /// </summary>
         private Texture _snakeHeadTexture;
         /// <summary>
+        /// Shader for the head of the snake
+        /// </summary>
+        private Shader _snakeHeadShader;
+        /// <summary>
+        /// The head of the snake
+        /// </summary>
+        private SnakeHead _snakeHead;
+        /// <summary>
         /// A list of all the snake components to make the actual snake
         /// </summary>
         private List<SnakeComponent> _snake = new List<SnakeComponent>();
@@ -57,6 +65,11 @@ namespace Snake
         /// </summary>
         private float _time;
 
+        /// <summary>
+        /// Is the window paused
+        /// </summary>
+        private bool _running = true;
+
 
         /// <summary>
         /// Creates a basic window
@@ -77,8 +90,9 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnLoad(EventArgs e)
         {
-            _snakeShader = new Shader("Shaders/snake.vert", "Shaders/basic.frag");
-            
+            _snakeShader = new Shader("Shaders/snake.vert", "Shaders/snake.frag");
+            _snakeHeadTexture = new Texture("Textures/snake.png");
+            _snakeHeadShader = new Shader("Shaders/fruit.vert", "Shaders/fruit.frag");
             AddSnakePart(4);
             
             _fruitTexture = new Texture("Textures/apple.png");
@@ -96,14 +110,15 @@ namespace Snake
         /// <param name="count">Amount of snake parts to add</param>
         private void AddSnakePart(int count = 1)
         {
-            if (_snake.Count == 0)
+            if (_snake.Count == 0 && _snakeHead == null)
             {
-                _snake.Add(new SnakeComponent(Config.StartPosition));
+                _snakeHead = new SnakeHead(Config.StartPosition);
                 count--;
             }
             for (int i = 0; i < count; i++)
             {
-                _snake.Add(new SnakeComponent(_snake.Last().PositionInt));
+                _snake.Add(new SnakeComponent(
+                    (_snake.Count > 0 ? _snake.Last() : _snakeHead).PositionInt));
             }
         }
 
@@ -154,8 +169,11 @@ namespace Snake
                 case Key.D:
                     _direction = Vector2.UnitX;
                     break;
+                case Key.Escape:
+                    _running = !_running;
+                    break;
             }
-
+            
             //Check if we want to move directly backwards
             if (-_direction == _lastDirection)
             {
@@ -176,16 +194,16 @@ namespace Snake
             {
                 return false;
             }
-            //Check if the position unique
+            //Check if the position is unique
             for (int i = 0; i < _snake.Count; i++)
             {
-                if (position == _snake[i].PositionInt && i != 0)
+                if (position == _snake[i].PositionInt)
                 {
                     return false;
                 }
             }
 
-            return true;
+            return position != _snakeHead.PositionInt || isHead;
         }
         
         /// <summary>
@@ -194,38 +212,43 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            _time += (float)e.Time;
-            while (_time >= Config.TickSpeed)
+            if (_running)
             {
-                //Update the direction of the snake body
-                for (int i = _snake.Count - 1; i > 0; i--)
+                _time += (float)e.Time;
+                while (_time >= Config.TickSpeed)
                 {
-                    _snake[i].Direction = _snake[i - 1].Direction;
+                    //Update the direction of the snake body
+                    for (int i = _snake.Count - 1; i > 0; i--)
+                    {
+                        _snake[i].Direction = _snake[i - 1].Direction;
+                    }
+                    _snake[0].Direction = _snakeHead.Direction;
+                    
+                    //Update the direction of the head of the snake
+                    _snakeHead.Direction = _direction;
+                    //Check if the snake head can occupy the position at the new direction
+                    if (!ValidPosition(_snakeHead.PositionInt + _snakeHead.Direction, true))
+                    {
+                        //Dead
+                        Console.WriteLine("Dead!");
+                    }
+                    
+                    //Check for the fruit powerup
+                    if (_snakeHead.PositionInt == _fruit.Position)
+                    {
+                        AddSnakePart();
+                        RegenerateFruit();
+                    }
+    
+                    _lastDirection = _snakeHead.Direction;
+                    _time -= Config.TickSpeed;
                 }
-                
-                //Update the direction of the head of the snake
-                _snake[0].Direction = _direction;
-                //Check if the snake head can occupy the position at the new direction
-                if (!ValidPosition(_snake[0].PositionInt + _snake[0].Direction, true))
+                //Update all the components of the snake
+                for (int i = 0; i < _snake.Count; i++)
                 {
-                    //Dead
-                    Console.WriteLine("Dead!");
+                    _snake[i].Update((float)e.Time);
                 }
-                
-                //Check for the fruit powerup
-                if (_snake[0].PositionInt == _fruit.Position)
-                {
-                    AddSnakePart();
-                    RegenerateFruit();
-                }
-
-                _lastDirection = _snake[0].Direction;
-                _time -= Config.TickSpeed;
-            }
-            //Update all the components of the snake
-            for (int i = 0; i < _snake.Count; i++)
-            {
-                _snake[i].Update((float)e.Time);
+                _snakeHead.Update((float)e.Time);
             }
             
             base.OnUpdateFrame(e);
@@ -237,24 +260,30 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-            
-            //TODO: Draw the background here
-            
-            //Draw everything here
-            
-            _fruitShader.Bind();
-            _fruitTexture.Bind();
-            _fruit.Draw();
-            
-            _snakeShader.Bind();
-
-            for (int i = 0; i < _snake.Count; i++)
+            if (_running)
             {
-                _snake[i].Draw();
+                GL.Clear(ClearBufferMask.ColorBufferBit);
+                
+                //TODO: Draw the background here
+                
+                //Draw fruit
+                _fruitShader.Bind();
+                _fruitTexture.Bind();
+                _fruit.Draw();
+                
+                //Draw the body of the snake
+                _snakeShader.Bind();
+                for (int i = 0; i < _snake.Count; i++)
+                {
+                    _snake[i].Draw();
+                }
+                //Draw the head of the snake
+                _snakeHeadShader.Bind();
+                _snakeHeadTexture.Bind();
+                _snakeHead.Draw();
+                
+                Context.SwapBuffers();
             }
-            
-            Context.SwapBuffers();
             
             base.OnRenderFrame(e);
         }
@@ -276,10 +305,17 @@ namespace Snake
         /// <param name="e">event arg passed to us by opentk</param>
         protected override void OnUnload(EventArgs e)
         {
+            //Dispose the fruit
             _fruitTexture.Dispose();
             _fruit.Dispose();
             _fruitShader.Dispose();
             
+            //Dispose the head of the snake
+            _snakeHeadShader.Dispose();
+            _snakeHeadTexture.Dispose();
+            _snakeHead.Dispose();
+            
+            //Dispose the body of the snake
             _snakeShader.Dispose();
             for (int i = 0; i < _snake.Count; i++)
             {
